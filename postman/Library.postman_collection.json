@@ -1,0 +1,219 @@
+{
+  "info": {
+    "name": "Library API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "Crear libro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El código de estado es 201', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Devuelve el libro con su id', () => {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "  pm.expect(pm.response.json().title).to.eql('El amor en los tiempos del cólera');",
+                  "});",
+                  "// Guarda el id del libro creado para usarlo en la petición Ver un libro.",
+                  "pm.collectionVariables.set('bookId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "books"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"El amor en los tiempos del cólera\",\n  \"author\": \"Gabriel García Márquez\",\n  \"isbn\": \"978-0-307-38973-2\",\n  \"copies\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar libros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El código de estado es 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('La respuesta es un arreglo que incluye al libro creado', () => {",
+                  "  const id = Number(pm.collectionVariables.get('bookId'));",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "  pm.expect(pm.response.json().some((book) => book.id === id)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "books"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ver un libro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El código de estado es 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Devuelve el libro pedido', () => {",
+                  "  pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('bookId')));",
+                  "  pm.expect(pm.response.json().isbn).to.eql('978-0-307-38973-2');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/{{bookId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "books",
+                "{{bookId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear libro inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El código de estado es 400', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Devuelve el mensaje de la regla incumplida', () => {",
+                  "  pm.expect(pm.response.json().error).to.eql('El ISBN no es válido');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "books"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Libro con ISBN incorrecto\",\n  \"author\": \"Autor de prueba\",\n  \"isbn\": \"123\",\n  \"copies\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ver libro inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El código de estado es 404', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('Devuelve el mensaje en español', () => {",
+                  "  pm.expect(pm.response.json().error).to.eql('Libro no encontrado');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "books",
+                "999999"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "bookId",
+      "value": ""
+    }
+  ]
+}
